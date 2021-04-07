@@ -1,0 +1,98 @@
+# Template for general controller parameters using the Modbus interface
+
+# % macro, P, Device prefix
+# % macro, Q, Device suffix
+# % macro, PORT, Asyn port
+# % macro, ADDR, Modbus address
+# % macro, DISABLED, Start disabled?
+
+# Autotune loop number address 3072
+record(mbbo, "$(P)$(Q):AUTOTUNELOOP") {
+	field(DESC, "Autotune Loop Number")
+	field(DTYP,"asynInt32")
+	field(OUT,"@asyn(Eurotherm_$(PORT)_$(ADDR)_0_Wr_ATUNE,0,1000)MODBUS_DATA")
+	field(ZRST, "Off")
+	field(ZRVL, "0")
+	field(ONST, "Loop 1")
+	field(ONVL, "11")
+	field(TWST, "Loop 2")
+	field(TWVL, "21")
+	field(THST, "Loop 3")
+	field(THVL, "31")
+}
+
+# % archiver 10 Monitor
+record(mbbi, "$(P)$(Q):AUTOTUNELOOP:RBV") {
+	field(DESC, "Autotune Loop Readback")
+	field(DTYP,"asynInt32")
+	field(INP,"@asyn(Eurotherm_$(PORT)_$(ADDR)_0_Rd_ATUNE,0,1000)MODBUS_DATA")
+	field(SCAN, "I/O Intr")
+	field(ZRST, "Off")
+	field(ZRVL, "0")
+	field(ONST, "Loop 1")
+	field(ONVL, "11")
+	field(TWST, "Loop 2")
+	field(TWVL, "21")
+	field(THST, "Loop 3")
+	field(THVL, "31")
+}
+
+# Autotune output high limit address 3076
+record(ao, "$(P)$(Q):AUTOTUNEOH") {
+	field(DESC, "Autotune Output High Limit")
+	field(DTYP,"asynInt32")
+	field(OUT,"@asyn(Eurotherm_$(PORT)_$(ADDR)_0_Wr_ATUNE,4,1000)MODBUS_DATA")
+	field(PREC, "1")
+	field(ASLO, "0.1")
+	field(DRVH, "100")
+	field(DRVL, "0")
+	field(EGU, "%")
+}
+
+# % archiver 10 Monitor
+record(ai, "$(P)$(Q):AUTOTUNEOH:RBV") {
+	field(DESC, "Autotune Output High Limit Readback")
+	field(DTYP,"asynInt32")
+	field(INP,"@asyn(Eurotherm_$(PORT)_$(ADDR)_0_Rd_ATUNE,4,1000)MODBUS_DATA")
+	field(PREC, "1")
+	field(ASLO, "0.1")
+	field(SCAN, "I/O Intr")
+	field(EGU, "%")
+}
+
+# Autotune output low limit address 3077
+record(ao, "$(P)$(Q):AUTOTUNEOL") {
+	field(DESC, "Autotune Output Low Limit")
+	field(DTYP,"asynInt32")
+	field(OUT,"@asyn(Eurotherm_$(PORT)_$(ADDR)_0_Wr_ATUNE,5,1000)MODBUS_DATA")
+	field(PREC, "1")
+	field(ASLO, "0.1")
+	field(DRVH, "100")
+	field(DRVL, "0")
+	field(EGU, "%")
+}
+
+# % archiver 10 Monitor
+record(ai, "$(P)$(Q):AUTOTUNEOL:RBV") {
+	field(DESC, "Autotune Output Low Limit Readback")
+	field(DTYP,"asynInt32")
+	field(INP,"@asyn(Eurotherm_$(PORT)_$(ADDR)_0_Rd_ATUNE,5,1000)MODBUS_DATA")
+	field(PREC, "1")
+	field(SCAN, "I/O Intr")
+	field(ASLO, "0.1")
+	field(EGU, "%")
+}
+
+record(bo, "$(P)$(Q):DISABLE") {
+  field(DESC, "Disable comms")
+  field(PINI, "YES")
+  field(VAL, "$(DISABLED=0)")
+  field(ZNAM, "Enabled")
+  field(ONAM, "Disabled")
+}
+
+record(stringin, "$(P)$(Q):ERR") {
+  field(DESC, "Error message")
+  field(PINI, "YES")
+  field(VAL, "No Error")
+}

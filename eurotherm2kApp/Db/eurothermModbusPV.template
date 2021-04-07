@@ -1,0 +1,19 @@
+# Template for an additional module PV
+
+# % macro, P, Device prefix
+# % macro, Q, Device suffix
+# % macro, NAME, PV name
+# % macro, DESC, PV description
+# % macro, PORT, Modbus port name
+# % macro, PREC, Precision
+# % macro, EGU, Engineering units
+
+record(ai, "$(P)$(Q):$(NAME):RBV") {
+	field(DESC, "$(DESC)")
+	field(DTYP,"asynInt32")
+	field(INP,"@asyn($(PORT),0,1000)MODBUS_DATA")
+	field(PREC, "$(PREC)")
+	field(EGU, "$(EGU)")
+	field(SCAN, "I/O Intr")
+	field(ASLO, "0.01")
+}

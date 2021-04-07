@@ -1,0 +1,96 @@
+## \file
+## Stream Device Protocol for eurotherm 2000 series EI Bisynch
+## \param GAD = First char of address, e.g. address = 1, GAD = 0, address = 12, GAD = 1
+## \param LAD = Second char of address, e.g. address = 1, LAD = 1, address = 12, LAD = 2
+
+locktimeout = 5000;
+
+## Unfortunately, this is designed with a checksum terminator.
+OutTerminator   = "";
+replytimeout = 200;
+## Setting a small readtimeout means that we can get data without needing a terminator
+readtimeout  = 100;
+extrainput   = Ignore;
+
+#STX = "\x02"
+#ETX = "\x03"
+#EOT = "\x04"
+#ENQ = "\x05"
+#ACK = "\x06"
+
+## Read value
+## \code
+## send: [EOT](GAD)(GAD)(LAD)(LAD)(CHAN)(C1)(C2)[ENQ]
+## reply: [STX](CHAN)(C1)(C2)<DATA>[ETX](BCC)
+## \endcode
+## - $1 = GAD
+## - $2 = LAD
+## - $3 = command mnemonic
+#############################################################################
+read { InTerminator = "\x03"; out "\x04\$1\$1\$2\$2\$3\x05"; in "\x02\$3%f"; }
+
+## Read value, but in hex
+readhex { InTerminator = "\x03"; out "\x04\$1\$1\$2\$2\$3\x05"; in "\x02\$3>%x"; }
+
+## NOTE: we rely on readtimeout for the in commands. 
+## Could use maxInput, but that screws up record initialisation (once inTerminator is set it can't be overwritten in the \@init handler)
+##
+## Write value
+## \code
+## send: [EOT](GAD)(GAD)(LAD)(LAD)[STX](CHAN)(C1)(C2)<DATA>[ETX](BCC)
+## reply: [ACK] or [NAK], discarded as no terminator
+## \endcode
+## - $1 = GAD
+## - $2 = LAD
+## - $3 = command mnemonic
+## - $4 = device prefix, \$(P)\$(Q)
+#############################################################################
+write {  InTerminator = ""; out "\x04\$1\$1\$2\$2\x02\$3%f\x03%6<xor>"; in "\x06"; @init{ read; }; @mismatch{ in "%(\$4:ERR.PROC)r"; }; }
+
+## Write a value in int rather than float
+writeint {  InTerminator = ""; out "\x04\$1\$1\$2\$2\x02\$3%i\x03%6<xor>"; in "\x06"; @init{ read; }; @mismatch{ in "%(\$4:ERR.PROC)r"; }; }
+
+
+### \brief Controller configuration mode
+##
+## This mode enable setting a number of controller configuration settings 
+## (see Communications Handbook PDF pages 5-25 onwards)
+##
+## We set the mode by sending a command 'IM2' and get out of the mode with the command 'IM0'
+## While in configuration mode the controller makes itself address 0 so any configuration commands
+## have to be sent to address = 0
+setConfMode {  InTerminator = ""; out "\x04\$1\$1\$2\$2\x02IM2\x03%6<xor>"; in "\x06"; @mismatch{ in "%(\$3:ERR.PROC)r"; }; }
+
+## Escape from the configuration mode in to normal operation mode
+clearConfMode {  InTerminator = ""; out "\x040000\x02IM0\x03%6<xor>"; in "\x06"; @mismatch{ in "%(\$1:ERR.PROC)r"; }; }
+
+## Get the current mode of the controller: 0=normal mode, 2=configuration mode
+getConfMode { InTerminator = "\x03"; out "\x0400%(\$1:ADDR.VAL)i%(\$1:ADDR.VAL)iIM\x05"; in "\x02IM%i."; }
+
+## \brief Set device precision.
+##
+## The number of decimal places in the controller is also the precision the data is returned when communicating over serial.
+## This parameter can only be set when in Configuration Mode (see above)
+setDecPlaces { InTerminator = ""; out "\x0400%(\$1:ADDR.VAL)i%(\$1:ADDR.VAL)i\x02QD%i\x03%6<xor>"; in "\x06"; @mismatch{ in "%(\$1:ERR.PROC)r"; }; }
+
+## Read the number of decimal places used in the controller
+getDecPlaces { InTerminator = "\x03"; out "\x0400%(\$1:ADDR.VAL)i%(\$1:ADDR.VAL)iQD\x05"; in "\x02QD%i."; }
+
+## The ramp rate time unit. Note this parameter can only be set when in Configuration Mode
+setRampRateUnit { InTerminator = ""; out "\x0400%(\$1:ADDR.VAL)i%(\$1:ADDR.VAL)i\x02QJ%i\x03%6<xor>"; in "\x06"; @mismatch{ in "%(\$1:ERR.PROC)r"; }; }
+
+## Read out the ramp rate time unit
+getRampRateUnit { InTerminator = "\x03"; out "\x0400%(\$1:ADDR.VAL)i%(\$1:ADDR.VAL)iQJ\x05"; in "\x02QJ%i."; }
+
+## \brief Write any ASCII string command to the device.
+## 
+## It will read the device address (although only the LAD part) from another record: \$1:ADDR.VAL
+addrWrite { InTerminator = "";     out "\x0400%(\$1:ADDR.VAL)i%(\$1:ADDR.VAL)i\x02%s\x03%6<xor>"; in "\x06";    @mismatch{ in "%(\$1:ERR.PROC)r"; }; }
+
+## \brief Read back any ASCII string paramter from the device.
+##
+## This will also read the device address from an external record.
+addrRead  { InTerminator = "\x03"; out "\x0400%(\$1:ADDR.VAL)i%(\$1:ADDR.VAL)i%s\x05"; in "\x02%(\$1:ADDR:RESP.VAL)6c"; }
+
+
+

@@ -1,0 +1,26 @@
+/**
+\mainpage eurotherm2k EPICS Support Module
+\section intro_sec Introduction
+This support module supports eurotherm 2000 series controllers. In order to use this module you should setup the following:
+
+- Default serial settings are 9600 7E1, although you can modify the baud rate. You should setup the serial port / terminal port in this way
+- Default device address (cmsAddr) is 01. This translates to GAD=0, LAD=1. For multidrop serial you can change this on the controller to be unique on the bus
+- Default protocol is EI-Bisynch. This must be set for this module to work.
+
+The manual for the communication protocol is <a href="../HA026230_3_2000 comms.pdf">here</a>
+
+Manuals for your eurotherm controller are available on <a href=http://www.eurotherm.co.uk/products/controllers/>Eurotherm's website</a>
+
+\section bugs_sec Known Bugs
+
+- A bug in streamdevice means \@init handler produces false error messages, even though it gets the right value
+
+\section build_sec Build Instructions 
+
+The \subpage build_instructions_example page contains instructions to build an example application using this module
+
+The \subpage build_instructions_example_modbus page contains instructions to build an ioc for a eurotherm modbus controller
+
+An example built using these instructions is available in iocs/example
+
+**/
