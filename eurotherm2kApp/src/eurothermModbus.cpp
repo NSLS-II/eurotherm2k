@@ -50,13 +50,19 @@
 /* Modbus address space definitions for controller parameters */
 #define AUTOTUNE_ADDR	3072	/*Autotune parameters (6 locations)*/
 
+asynStatus drvModbusAsynConfigure(const char *portName, const char *octetPortName,
+                                  int modbusSlave, int modbusFunction,
+                                  int modbusStartAddress, int modbusLength,
+                                  const char *dataTypeString,
+                                  int pollMsec,
+                                  const char *plcType);
 
 /* Create modbus port name in the form:
 	Eurotherm_ASYNPORT_ADDR_LOOPNO_Rd_VarName 
 	Eurotherm_ASYNPORT_ADDR_LOOPNO_Wr_VarName 
 	Controller variables use loop 0
 */
-int mkname(char *str, int max, char *asynPortName, int modbusAddress, int loopNumber, int Write, char *szVariable)
+int mkname(char *str, int max, char *asynPortName, int modbusAddress, int loopNumber, int Write, const char *szVariable)
 {
 	int ret;
 	
@@ -91,7 +97,7 @@ static int eurothermModbusCtrlConfigure(char *asynPortName, int modbusAddress)
 		//free(str);
 		return -errno;
 	}
-	str = malloc(strmaxlen);
+	str = (char*) malloc(strmaxlen);
 	if(str == NULL) {
 		LOG_ERROR("Could not allocate %d bytes of memory", strmaxlen);
 		free(str);
@@ -162,7 +168,7 @@ static int eurothermModbusLoopConfigure(char *asynPortName, int modbusAddress, i
 		//free(str);
 		return -errno;
 	}
-	str = malloc(strmaxlen);
+	str = (char*) malloc(strmaxlen);
 	if(str == NULL) {
 		LOG_ERROR("Could not allocate %d bytes of memory", strmaxlen);
 		free(str);

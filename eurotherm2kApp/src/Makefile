@@ -16,7 +16,7 @@ eurotherm2k_vdct_DBD += calc.dbd
 eurotherm2k_vdct_DBD += stream.dbd
 
 # The following are compiled and added to the support library
-eurothermModbus_SRCS += eurothermModbus.c
+eurothermModbus_SRCS += eurothermModbus.cpp
 
 # We need to link against the EPICS Base libraries
 eurothermModbus_LIBS += $(EPICS_BASE_IOC_LIBS)
