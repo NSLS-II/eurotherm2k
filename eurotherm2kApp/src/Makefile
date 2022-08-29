@@ -19,6 +19,6 @@ eurotherm2k_vdct_DBD += stream.dbd
 eurothermModbus_SRCS += eurothermModbus.cpp
 
 # We need to link against the EPICS Base libraries
-eurothermModbus_LIBS += $(EPICS_BASE_IOC_LIBS)
+eurothermModbus_LIBS += $(EPICS_BASE_IOC_LIBS) asyn modbus
 
 include $(TOP)/configure/RULES

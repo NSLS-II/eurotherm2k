@@ -50,13 +50,6 @@
 /* Modbus address space definitions for controller parameters */
 #define AUTOTUNE_ADDR	3072	/*Autotune parameters (6 locations)*/
 
-asynStatus drvModbusAsynConfigure(const char *portName, const char *octetPortName,
-                                  int modbusSlave, int modbusFunction,
-                                  int modbusStartAddress, int modbusLength,
-                                  const char *dataTypeString,
-                                  int pollMsec,
-                                  const char *plcType);
-
 /* Create modbus port name in the form:
 	Eurotherm_ASYNPORT_ADDR_LOOPNO_Rd_VarName 
 	Eurotherm_ASYNPORT_ADDR_LOOPNO_Wr_VarName 
@@ -80,6 +73,7 @@ static int eurothermModbusCtrlConfigure(char *asynPortName, int modbusAddress)
 	asynStatus asynRet;
 	char *str;
 	int strmaxlen;
+    asynRet = asynSuccess;
 	
 	if (asynPortName == NULL) {
 		LOG_ERROR("Invalid asynPortName argument (NULL)");
@@ -106,18 +100,18 @@ static int eurothermModbusCtrlConfigure(char *asynPortName, int modbusAddress)
 	
 	/* Create modbus channels for the autotune parameters */
 	mkname(str, strmaxlen, asynPortName, modbusAddress, 0, 0, "ATUNE");
-	asynRet = drvModbusAsynConfigure(str, asynPortName, modbusAddress,
+	new drvModbusAsyn(str, asynPortName, modbusAddress,
 				MODBUS_READW, AUTOTUNE_ADDR, 6,
-				0, EUROTHERM_POLL_MS, "");
+				(modbusDataType_t) 0, EUROTHERM_POLL_MS, "");
 	if (asynRet != asynSuccess) {
 		LOG_ERROR("drvModbusAsynConfigure failed with error %d", asynRet);
 		free(str);
 		return -EIO;
 	}
 	mkname(str, strmaxlen, asynPortName, modbusAddress, 0, 1, "ATUNE");
-	asynRet = drvModbusAsynConfigure(str, asynPortName, modbusAddress,
+	new drvModbusAsyn(str, asynPortName, modbusAddress,
 				MODBUS_WRITEW, AUTOTUNE_ADDR, 6,
-				0, EUROTHERM_POLL_MS, "");
+				(modbusDataType_t) 0, EUROTHERM_POLL_MS, "");
 	if (asynRet != asynSuccess) {
 		LOG_ERROR("drvModbusAsynConfigure failed with error %d", asynRet);
 		free(str);
@@ -174,21 +168,22 @@ static int eurothermModbusLoopConfigure(char *asynPortName, int modbusAddress, i
 		free(str);
 		return -ENOMEM;
 	}
-	
+
+    asynRet = asynSuccess;
 	/* Create modbus channels for the PV, target setpoint and manual output */
 	mkname(str, strmaxlen, asynPortName, modbusAddress, loopNumber, 0, "PV");
-	asynRet = drvModbusAsynConfigure(str, asynPortName, modbusAddress,
+	new drvModbusAsyn(str, asynPortName, modbusAddress,
 				MODBUS_READW, loopStart+PV_OFFSET, 3,
-				0, EUROTHERM_POLL_MS, "");
+				(modbusDataType_t) 0, EUROTHERM_POLL_MS, "");
 	if (asynRet != asynSuccess) {
 		LOG_ERROR("drvModbusAsynConfigure failed with error %d", asynRet);
 		free(str);
 		return -EIO;
 	}
 	mkname(str, strmaxlen, asynPortName, modbusAddress, loopNumber, 1, "PV");
-	asynRet = drvModbusAsynConfigure(str, asynPortName, modbusAddress,
+	new drvModbusAsyn(str, asynPortName, modbusAddress,
 				MODBUS_WRITEW, loopStart+PV_OFFSET, 3,
-				0, EUROTHERM_POLL_MS, "");
+				(modbusDataType_t) 0, EUROTHERM_POLL_MS, "");
 	if (asynRet != asynSuccess) {
 		LOG_ERROR("drvModbusAsynConfigure failed with error %d", asynRet);
 		free(str);
@@ -197,18 +192,18 @@ static int eurothermModbusLoopConfigure(char *asynPortName, int modbusAddress, i
 	
 	/* Create modbus channels for the ramp rate */
 	mkname(str, strmaxlen, asynPortName, modbusAddress, loopNumber, 0, "RR");
-	asynRet = drvModbusAsynConfigure(str, asynPortName, modbusAddress,
+	new drvModbusAsyn(str, asynPortName, modbusAddress,
 				MODBUS_READW, loopStart+RR_OFFSET, 1,
-				0, EUROTHERM_POLL_MS, "");
+				(modbusDataType_t) 0, EUROTHERM_POLL_MS, "");
 	if (asynRet != asynSuccess) {
 		LOG_ERROR("drvModbusAsynConfigure failed with error %d", asynRet);
 		free(str);
 		return -EIO;
 	}
 	mkname(str, strmaxlen, asynPortName, modbusAddress, loopNumber, 1, "RR");
-	asynRet = drvModbusAsynConfigure(str, asynPortName, modbusAddress,
+	new drvModbusAsyn(str, asynPortName, modbusAddress,
 				MODBUS_WRITEW, loopStart+RR_OFFSET, 1,
-				0, EUROTHERM_POLL_MS, "");
+				(modbusDataType_t) 0, EUROTHERM_POLL_MS, "");
 	if (asynRet != asynSuccess) {
 		LOG_ERROR("drvModbusAsynConfigure failed with error %d", asynRet);
 		free(str);
@@ -217,18 +212,18 @@ static int eurothermModbusLoopConfigure(char *asynPortName, int modbusAddress, i
 	
 	/* Create modbus channels for the manual/auto mode */
 	mkname(str, strmaxlen, asynPortName, modbusAddress, loopNumber, 0, "MAN");
-	asynRet = drvModbusAsynConfigure(str, asynPortName, modbusAddress,
+	new drvModbusAsyn(str, asynPortName, modbusAddress,
 				MODBUS_READW, loopStart+MAN_OFFSET, 1,
-				0, EUROTHERM_POLL_MS, "");
+				(modbusDataType_t) 0, EUROTHERM_POLL_MS, "");
 	if (asynRet != asynSuccess) {
 		LOG_ERROR("drvModbusAsynConfigure failed with error %d", asynRet);
 		free(str);
 		return -EIO;
 	}
 	mkname(str, strmaxlen, asynPortName, modbusAddress, loopNumber, 1, "MAN");
-	asynRet = drvModbusAsynConfigure(str, asynPortName, modbusAddress,
+	new drvModbusAsyn(str, asynPortName, modbusAddress,
 				MODBUS_WRITEW, loopStart+MAN_OFFSET, 1,
-				0, EUROTHERM_POLL_MS, "");
+				(modbusDataType_t) 0, EUROTHERM_POLL_MS, "");
 	if (asynRet != asynSuccess) {
 		LOG_ERROR("drvModbusAsynConfigure failed with error %d", asynRet);
 		free(str);
@@ -237,18 +232,18 @@ static int eurothermModbusLoopConfigure(char *asynPortName, int modbusAddress, i
 	
 	/* Create modbus channels for the PID parameters */
 	mkname(str, strmaxlen, asynPortName, modbusAddress, loopNumber, 0, "PID");
-	asynRet = drvModbusAsynConfigure(str, asynPortName, modbusAddress,
+	new drvModbusAsyn(str, asynPortName, modbusAddress,
 				MODBUS_READW, loopStart+PID_OFFSET, 3,
-				0, EUROTHERM_POLL_MS, "");
+				(modbusDataType_t) 0, EUROTHERM_POLL_MS, "");
 	if (asynRet != asynSuccess) {
 		LOG_ERROR("drvModbusAsynConfigure failed with error %d", asynRet);
 		free(str);
 		return -EIO;
 	}
 	mkname(str, strmaxlen, asynPortName, modbusAddress, loopNumber, 1, "PID");
-	asynRet = drvModbusAsynConfigure(str, asynPortName, modbusAddress,
+	new drvModbusAsyn(str, asynPortName, modbusAddress,
 				MODBUS_WRITEW, loopStart+PID_OFFSET, 3,
-				0, EUROTHERM_POLL_MS, "");
+				(modbusDataType_t) 0, EUROTHERM_POLL_MS, "");
 	if (asynRet != asynSuccess) {
 		LOG_ERROR("drvModbusAsynConfigure failed with error %d", asynRet);
 		free(str);
