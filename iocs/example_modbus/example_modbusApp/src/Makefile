@@ -14,9 +14,9 @@ example_modbus_DBD += drvAsynIPPort.dbd
 example_modbus_DBD += modbusSupport.dbd
 example_modbus_DBD += eurothermModbusSupport.dbd
 example_modbus_SRCS += example_modbus_registerRecordDeviceDriver.cpp
-example_modbus_LIBS += eurothermModbus
 example_modbus_LIBS += modbus
 example_modbus_LIBS += asyn
+example_modbus_LIBS += eurothermModbus
 example_modbus_LIBS += $(EPICS_BASE_IOC_LIBS)
 example_modbus_SRCS += example_modbusMain.cpp
 
